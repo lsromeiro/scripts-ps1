@@ -1,0 +1,21 @@
+ # list groups from users in a especific OU
+ #Import Modules
+ import-module activedirectory
+ # Empty Array
+ $Array = @()
+    
+ # Get your users
+ $Users = (get-aduser -filter * -searchbase "OU=Administrators,DC=tpb,DC=corp" ).samaccountname
+ # Loop through the users
+ foreach ($user in $users) {
+ # Get Users' Groups
+   $groups = (get-aduser $user -Properties memberof).memberof
+ # Make a new object with the findings
+ $NewObj = New-Object System.Object
+     $NewObj | Add-Member -type NoteProperty -Name "SamAccountName" -Value "$user"
+     $NewObj | Add-Member -type NoteProperty -Name "Groups" -Value "$groups"
+ # Add the object to an array (one at a time)
+ $Array += $NewObj
+                             }  # End Loop
+ # Dump filled array to a file
+ $Array | export-csv "GrpMembers.csv" -NoTypeInformation
